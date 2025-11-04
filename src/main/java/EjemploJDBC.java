@@ -1,7 +1,8 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import model.Usuario;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class EjemploJDBC {
@@ -54,15 +55,15 @@ public class EjemploJDBC {
                     break;
                 case 4:
                     System.out.println("\n--- Demo 4: Ejecución por Lotes (Batch) ---");
-                    demoBatchInsert();
+//                    demoBatchInsert();
                     break;
                 case 5:
                     System.out.println("\n--- Demo 5: Gestión de Transacciones ---");
-                    demoTransaccion();
+//                    demoTransaccion();
                     break;
                 case 6:
                     System.out.println("\n--- Demo 6: CallableStatement (Stored Procedure) ---");
-                    demoCallableStatement();
+//                    demoCallableStatement();
                     break;
                 case 0:
                     System.out.println("\nSaliendo...");
@@ -75,6 +76,65 @@ public class EjemploJDBC {
 
         scanner.close();
         System.out.println("\n--- Fin de las demostraciones ---");
+    }
+
+    private static void demoSelectConMapeo() {
+        String sqlSelect ="Select * from usuarios WHERE nombre like ?";
+
+        List<Usuario> usuarios = new ArrayList<>();
+
+        try(Connection conn = DriverManager.getConnection(URL, USER, PASS);
+            PreparedStatement pstmt = conn.prepareStatement(sqlSelect)) {
+
+            pstmt.setString(1, "P%");
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String nombre = rs.getString("nombre");
+                String email = rs.getString("email");
+
+                Usuario user = new Usuario(id, nombre, email);
+                usuarios.add(user);
+            }
+
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+
+        for (Usuario usuario : usuarios) {
+            System.out.println(usuario);
+        }
+
+
+
+    }
+
+    private static void demoInsertPreparedStatement() {
+
+        String sqlInseert ="INSERT INTO usuarios(nombre, email) VALUES (?,?);";
+
+        try(Connection conn = DriverManager.getConnection(URL, USER, PASS);
+            PreparedStatement pstmt = conn.prepareStatement(sqlInseert)){
+
+            pstmt.setString(1, "Pepito Perez");
+            pstmt.setString(2, "pepitoperez@gmail.com");
+
+            int filasAfectadas = pstmt.executeUpdate();
+
+            pstmt.setString(1, "Luisa Perez");
+            pstmt.setString(2, "luisaperez@gmail.com");
+
+            filasAfectadas+=pstmt.executeUpdate();
+
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+
+
     }
 
     private static void demoDDL() {
