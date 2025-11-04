@@ -1,3 +1,7 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Scanner;
 
 public class EjemploJDBC {
@@ -71,5 +75,42 @@ public class EjemploJDBC {
 
         scanner.close();
         System.out.println("\n--- Fin de las demostraciones ---");
+    }
+
+    private static void demoDDL() {
+        // SQL para DDL
+        String sqlDropUsuarios = "DROP TABLE IF EXISTS usuarios";
+        String sqlCreateUsuarios = "CREATE TABLE usuarios (" +
+                " id INT AUTO_INCREMENT PRIMARY KEY," +
+                " nombre VARCHAR(100) NOT NULL," +
+                " email VARCHAR(100) NOT NULL UNIQUE" +
+                ")";
+
+        String sqlDropCuentas = "DROP TABLE IF EXISTS cuentas";
+        String sqlCreateCuentas = "CREATE TABLE cuentas (" +
+                " id VARCHAR(10) PRIMARY KEY," +
+                " saldo DECIMAL(10, 2) NOT NULL" +
+                ")";
+
+        String sqlInsertCuentas = "INSERT INTO cuentas(id, saldo) VALUES ('A', 1000.00), ('B', 500.00)";
+
+        try(Connection conn = DriverManager.getConnection(URL, USER, PASS);
+            Statement stmt = conn.createStatement()){
+
+            //!  Drop tablas
+            stmt.execute(sqlDropUsuarios);
+            stmt.execute(sqlDropCuentas);
+
+            //* Crear tablas
+            stmt.execute(sqlCreateUsuarios);
+            stmt.execute(sqlCreateCuentas);
+
+            //* Insert
+            stmt.execute(sqlInsertCuentas);
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
