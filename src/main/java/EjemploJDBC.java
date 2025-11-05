@@ -63,7 +63,7 @@ public class EjemploJDBC {
                     break;
                 case 6:
                     System.out.println("\n--- Demo 6: CallableStatement (Stored Procedure) ---");
-//                    demoCallableStatement();
+                    demoCallableStatement();
                     break;
                 case 0:
                     System.out.println("\nSaliendo...");
@@ -76,6 +76,34 @@ public class EjemploJDBC {
 
         scanner.close();
         System.out.println("\n--- Fin de las demostraciones ---");
+    }
+
+    private static void demoCallableStatement() {
+        String sqlCall= "{CALL sp_get_usuario_info(?,?,?)}";
+
+        int idBuscado = 1;
+
+        try(Connection conn = DriverManager.getConnection(URL,USER,PASS);
+        CallableStatement cstmt = conn.prepareCall(sqlCall)){
+
+//            ? Indicamos input
+            cstmt.setInt(1, idBuscado);
+
+//            ? Indicamos Salida
+            cstmt.registerOutParameter(2, Types.VARCHAR);
+            cstmt.registerOutParameter(3, Types.VARCHAR);
+
+//            * Run
+            cstmt.execute();
+
+            String nombre = cstmt.getString(2);
+            String email = cstmt.getString(3);
+
+            System.out.println( nombre + " " + email);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     //* Transacciones
