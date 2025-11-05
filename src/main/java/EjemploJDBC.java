@@ -59,7 +59,7 @@ public class EjemploJDBC {
                     break;
                 case 5:
                     System.out.println("\n--- Demo 5: Gestión de Transacciones ---");
-//                    demoTransaccion();
+                    demoTransaccion();
                     break;
                 case 6:
                     System.out.println("\n--- Demo 6: CallableStatement (Stored Procedure) ---");
@@ -78,6 +78,65 @@ public class EjemploJDBC {
         System.out.println("\n--- Fin de las demostraciones ---");
     }
 
+    //* Transacciones
+    private static void demoTransaccion() {
+        String sqlRestarA   = "UPDATE cuentas SET saldo = saldo - 100 where id='A'";
+        String sqlSumaB     = "UPDATE cuentas SET saldo = saldo + 100 where id='B'";
+//        ! Consulta pra que falle la transaccion
+//        String sqlSumaB     = "UPDATE cuentasasdasdasd SET saldo = saldo + 100 where id='B'";
+
+        Connection conn = null;
+
+
+        try{
+            conn = DriverManager.getConnection(URL, USER, PASS);
+            conn.setAutoCommit(false);
+
+            try(Statement stmt = conn.createStatement()){
+                stmt.executeUpdate(sqlRestarA);
+                stmt.executeUpdate(sqlSumaB);
+            }
+
+            conn.commit();
+
+        } catch (SQLException e) {
+//            Si la conn falla no ay que deshacer el rollback
+            if (conn != null) {
+                try{
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+
+    }
+
+    //* Inserciones masivas
+    private static void demoBatchInsert() {
+//        String sqlInseert ="INSERT INTO usuarios(nombre, email) VALUES (?,?);";
+//
+//        try(Connection conn = DriverManager.getConnection(URL, USER, PASS);
+//            PreparedStatement pstmt = conn.prepareStatement(sqlInseert)){
+//
+//        }catch (SQLException e){
+//            System.err.println(e.getMessage());
+//            e.printStackTrace();
+//        }
+
+
+    }
+
+    //* Select
     private static void demoSelectConMapeo() {
         String sqlSelect ="Select * from usuarios WHERE nombre like ?";
 
@@ -109,9 +168,9 @@ public class EjemploJDBC {
         }
 
 
-
     }
 
+    //* Insert
     private static void demoInsertPreparedStatement() {
 
         String sqlInseert ="INSERT INTO usuarios(nombre, email) VALUES (?,?);";
@@ -137,6 +196,7 @@ public class EjemploJDBC {
 
     }
 
+    //* Levantar BD
     private static void demoDDL() {
         // SQL para DDL
         String sqlDropUsuarios = "DROP TABLE IF EXISTS usuarios";
