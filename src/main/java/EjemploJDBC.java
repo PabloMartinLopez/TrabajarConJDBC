@@ -55,7 +55,7 @@ public class EjemploJDBC {
                     break;
                 case 4:
                     System.out.println("\n--- Demo 4: Ejecución por Lotes (Batch) ---");
-//                    demoBatchInsert();
+                    demoBatchInsert();
                     break;
                 case 5:
                     System.out.println("\n--- Demo 5: Gestión de Transacciones ---");
@@ -123,15 +123,33 @@ public class EjemploJDBC {
 
     //* Inserciones masivas
     private static void demoBatchInsert() {
-//        String sqlInseert ="INSERT INTO usuarios(nombre, email) VALUES (?,?);";
-//
-//        try(Connection conn = DriverManager.getConnection(URL, USER, PASS);
-//            PreparedStatement pstmt = conn.prepareStatement(sqlInseert)){
-//
-//        }catch (SQLException e){
-//            System.err.println(e.getMessage());
-//            e.printStackTrace();
-//        }
+        String sqlInseert ="INSERT INTO usuarios(nombre, email) VALUES (?,?);";
+
+        try(Connection conn = DriverManager.getConnection(URL, USER, PASS);
+            PreparedStatement pstmt = conn.prepareStatement(sqlInseert)){
+
+            conn.setAutoCommit(false);
+
+            System.out.println("Añadiendo al lote...");
+            for (int i = 0; i < 5; i++) {
+                pstmt.setString(1, "Usuario Batch " + i);
+                pstmt.setString(2, "batch" + i + "@email.com");
+                pstmt.addBatch(); // Añade la sentencia al lote
+            }
+
+            int[] resultados = pstmt.executeBatch();
+            System.out.println("Lote ejecutado. Resultados (filas afectadas por sentencia):");
+            for (int res : resultados) {
+                System.out.print(res + " ");
+            }
+            System.out.println();
+
+            conn.commit();
+
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
 
 
     }
